@@ -1,1 +1,451 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pose-moi une question anonyme — Envoyer</title>
+  <meta name="description" content="Envoie un message anonyme à quelqu'un via son lien NGL Local — rapide, mobile-first et sécurisé.">
+  <style>
+    :root{
+      --bg-1:#071123;
+      --bg-2:#081826;
+      --card:#0b1220;
+      --accent:#06b6d4;
+      --accent-contrast:#00121a;
+      --muted:#9aa6b2;
+      --success:#22c55e;
+      --danger:#ef4444;
+      --radius:14px;
+      --max-width:720px;
+    }
+    html,body{height:100%;}
+    body{
+      margin:0;
+      min-height:100%;
+      font-family: system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+      background: radial-gradient(1200px 600px at 10% 10%, rgba(6,182,212,0.06), transparent),
+                  linear-gradient(180deg,var(--bg-1),var(--bg-2));
+      color:#e6eef3;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding:20px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
 
+    .wrap{
+      width:100%;
+      max-width:var(--max-width);
+      margin:20px;
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:var(--radius);
+      padding:18px;
+      box-shadow: 0 6px 30px rgba(2,6,23,0.6);
+      border: 1px solid rgba(255,255,255,0.03);
+    }
+
+    header.header{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:12px;
+    }
+    .title{
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+    .logo{
+      width:52px;
+      height:52px;
+      border-radius:12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:800;
+      font-size:20px;
+      color:var(--accent-contrast);
+      background:linear-gradient(135deg,var(--accent),#0891b2);
+      box-shadow: 0 6px 18px rgba(6,182,212,0.12);
+    }
+    h1{ margin:0; font-size:20px; font-weight:700; }
+    p.lead{ margin:0; color:var(--muted); font-size:13px; }
+
+    form#sendForm{ margin-top:12px; display:flex; flex-direction:column; gap:10px; }
+    label{ font-size:13px; color:var(--muted); }
+    textarea{
+      width:100%;
+      min-height:140px;
+      resize:vertical;
+      padding:14px;
+      border-radius:10px;
+      outline:none;
+      border:1px solid rgba(255,255,255,0.04);
+      background: rgba(255,255,255,0.01);
+      color:inherit;
+      font-size:15px;
+      line-height:1.35;
+    }
+    .controls{ display:flex; gap:8px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+    .left-controls{ display:flex; gap:8px; align-items:center; }
+    .right-controls{ display:flex; gap:8px; align-items:center; }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      border:0;
+      padding:12px 14px;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:700;
+      font-size:14px;
+    }
+    .btn-primary{
+      background:linear-gradient(180deg,var(--accent),#0aa2bb);
+      color:var(--accent-contrast);
+      box-shadow: 0 8px 22px rgba(6,182,212,0.12);
+    }
+    .btn-ghost{
+      background:transparent;
+      color:var(--muted);
+      border:1px solid rgba(255,255,255,0.03);
+    }
+    .small{ font-size:13px; padding:8px 10px; font-weight:600; border-radius:8px; }
+
+    .meta{ font-size:13px; color:var(--muted); display:flex; gap:8px; align-items:center; }
+    .charcount{ color:var(--muted); font-weight:600; }
+    .error{ color:var(--danger); font-weight:700; }
+    .success{ color:var(--success); font-weight:700; }
+
+    .toast{
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:10px;
+      background: rgba(0,0,0,0.35);
+      color:inherit;
+      display:none;
+    }
+    .toast.show{ display:block; animation:pop .18s ease; }
+    @keyframes pop{ from{ transform: translateY(6px); opacity:0 } to{ transform: translateY(0); opacity:1 } }
+
+    .share-row{ display:flex; gap:8px; align-items:center; margin-top:8px; flex-wrap:wrap; }
+
+    .qr{
+      width:64px;
+      height:64px;
+      border-radius:8px;
+      background:#04121a;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border:1px solid rgba(255,255,255,0.03);
+    }
+
+    footer.note{ margin-top:12px; color:var(--muted); font-size:13px; }
+
+    /* responsive */
+    @media (max-width:520px){
+      .title h1{ font-size:17px; }
+      .logo{ width:46px; height:46px; font-size:18px; }
+      textarea{ min-height:120px; }
+      .qr{ width:56px; height:56px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap" id="app">
+    <section class="card" aria-labelledby="heading">
+      <header class="header">
+        <div class="title">
+          <div class="logo" aria-hidden="true">NGL</div>
+          <div>
+            <h1 id="heading">Pose-moi une question anonyme 👀</h1>
+            <p class="lead">Envoie un message anonyme — sans nom, sans trace côté destinataire.</p>
+          </div>
+        </div>
+
+        <div style="text-align:right">
+          <div class="meta">Lien: <strong id="linkIdDisplay">—</strong></div>
+          <div class="meta"><small id="targetHint" style="color:var(--muted)">Partage sur WhatsApp • Copier le lien</small></div>
+        </div>
+      </header>
+
+      <form id="sendForm" novalidate aria-describedby="formNote">
+        <label for="message">Ton message</label>
+        <textarea id="message" name="message" inputmode="text" autocomplete="off" placeholder="Écris ton message... (respecte les règles)" aria-required="true" aria-describedby="charCount"></textarea>
+
+        <div class="controls">
+          <div class="left-controls">
+            <div id="charCount" class="charcount">0 / 2000</div>
+            <div id="spamGuardInfo" class="meta" style="margin-left:8px; display:none;">Tu as envoyé trop de messages récemment ⚠️</div>
+          </div>
+
+          <div class="right-controls">
+            <button id="btnCopy" type="button" class="btn btn-ghost small" title="Copier le lien">Copier le lien</button>
+            <button id="btnWhatsapp" type="button" class="btn btn-ghost small" title="Partager sur WhatsApp">WhatsApp</button>
+            <button id="btnSend" class="btn btn-primary" type="submit" aria-live="polite">Envoyer</button>
+          </div>
+        </div>
+
+        <div class="share-row">
+          <div class="qr" id="qrContainer" aria-hidden="true" title="QR code pour partager">
+            <img id="qrImg" alt="" style="width:56px;height:56px;border-radius:6px;">
+          </div>
+          <div class="meta" style="flex:1">
+            <div><strong id="sentCount">Messages reçus : —</strong></div>
+            <div style="font-size:13px;color:var(--muted)">Les messages sont anonymes. Respecte les personnes et évite les insultes.</div>
+          </div>
+        </div>
+
+        <div id="toast" class="toast" role="status" aria-live="polite"></div>
+        <div id="formNote" class="meta" style="margin-top:8px">Ce site stocke les messages côté serveur. En cas d'abus, contacte l'administrateur.</div>
+      </form>
+
+      <footer class="note">
+        Astuce : partage directement ce lien via WhatsApp — le destinataire recevra les messages dans son dashboard privé.
+      </footer>
+    </section>
+  </main>
+
+<script>
+/*
+  Frontend behavior:
+  - Detect linkId from URL: /u/:linkId or ?target=xyz
+  - Character counter & limit
+  - Client-side rate limit (localStorage) to slow bots and improve UX
+  - Fetch /api/send (expects JSON {message, target}) and handles responses
+  - Copy link & WhatsApp share & QR image using Google Chart API as fallback
+  - Placeholder for reCAPTCHA: RECAPTCHA_SITE_KEY can be injected by server; see comments
+*/
+
+(() => {
+  const MAX_CHARS = 2000;
+  const LOCAL_LIMIT_COUNT = 6;       // messages allowed per window in client
+  const LOCAL_LIMIT_WINDOW_MS = 60_000; // one minute window
+  const SEND_ENDPOINT = '/api/send';
+  // If you integrate reCAPTCHA, set SITE_KEY here (or server injects it in global)
+  const RECAPTCHA_SITE_KEY = window.__RECAPTCHA_SITE_KEY || null;
+
+  const el = {
+    form: document.getElementById('sendForm'),
+    message: document.getElementById('message'),
+    charCount: document.getElementById('charCount'),
+    btnSend: document.getElementById('btnSend'),
+    toast: document.getElementById('toast'),
+    linkIdDisplay: document.getElementById('linkIdDisplay'),
+    btnCopy: document.getElementById('btnCopy'),
+    btnWhatsapp: document.getElementById('btnWhatsapp'),
+    qrImg: document.getElementById('qrImg'),
+    sentCount: document.getElementById('sentCount'),
+    spamGuardInfo: document.getElementById('spamGuardInfo'),
+  };
+
+  // Utilities
+  function $(q) { return document.querySelector(q); }
+  function showToast(text, type='info', ms=3500) {
+    el.toast.textContent = text;
+    el.toast.classList.add('show');
+    el.toast.style.borderLeft = (type === 'error') ? '4px solid var(--danger)' : (type === 'success') ? '4px solid var(--success)' : 'none';
+    clearTimeout(el._toastTimer);
+    el._toastTimer = setTimeout(() => { el.toast.classList.remove('show'); }, ms);
+  }
+
+  function getLinkIdFromUrl() {
+    // pattern: /u/:linkId  OR ?target=linkId  OR last path segment
+    const p = location.pathname.split('/').filter(Boolean);
+    if (p[0] === 'u' && p[1]) return p[1];
+    const params = new URLSearchParams(location.search);
+    if (params.get('target')) return params.get('target');
+    // fallback: last segment if plausible
+    const last = p[p.length-1];
+    if (last && /^[\w-]{3,50}$/.test(last)) return last;
+    return null;
+  }
+
+  const linkId = getLinkIdFromUrl() || 'public';
+  const shareUrl = `${location.origin}/u/${encodeURIComponent(linkId)}`;
+  el.linkIdDisplay.textContent = linkId;
+  // Generate QR using Google Chart API (simple fallback). For production, consider server-generated PNG or client-side QR lib.
+  el.qrImg.src = `https://chart.googleapis.com/chart?cht=qr&chs=180x180&chl=${encodeURIComponent(shareUrl)}&chld=L|1`;
+
+  // Fetch basic stats (optional) - attempts GET /api/messages/count?target=...
+  (async function fetchCount(){
+    try {
+      const r = await fetch(`/api/messages/count?target=${encodeURIComponent(linkId)}`);
+      if (!r.ok) return;
+      const j = await r.json();
+      if (j && typeof j.count === 'number') el.sentCount.textContent = 'Messages reçus : ' + j.count;
+    } catch(e){
+      // ignore
+    }
+  })();
+
+  // char counter
+  function updateCharCount(){
+    const len = el.message.value.length;
+    el.charCount.textContent = `${len} / ${MAX_CHARS}`;
+    el.charCount.style.color = (len > MAX_CHARS) ? 'var(--danger)' : 'var(--muted)';
+    if (len > MAX_CHARS) el.message.setAttribute('aria-invalid', 'true');
+    else el.message.removeAttribute('aria-invalid');
+  }
+  el.message.addEventListener('input', updateCharCount);
+  updateCharCount();
+
+  // Client-side localStorage rate limiting to improve UX & slow bots
+  function getLocalKey() { return `ngl:sendlog:${linkId}`; }
+  function logLocalSend(){
+    const key = getLocalKey();
+    const now = Date.now();
+    const arr = JSON.parse(localStorage.getItem(key) || '[]').filter(ts => now - ts < LOCAL_LIMIT_WINDOW_MS);
+    arr.push(now);
+    localStorage.setItem(key, JSON.stringify(arr));
+    return arr.length;
+  }
+  function localSendCount(){
+    const key = getLocalKey();
+    const now = Date.now();
+    const arr = JSON.parse(localStorage.getItem(key) || '[]').filter(ts => now - ts < LOCAL_LIMIT_WINDOW_MS);
+    localStorage.setItem(key, JSON.stringify(arr));
+    return arr.length;
+  }
+
+  // Copy link action
+  el.btnCopy.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      showToast('Lien copié ✅', 'success');
+    } catch (e) {
+      showToast('Impossible de copier — sélectionne le lien manuellement', 'error');
+    }
+  });
+
+  // WhatsApp share action
+  el.btnWhatsapp.addEventListener('click', () => {
+    const text = `Pose-moi une question anonyme ➜ ${shareUrl}`;
+    const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    // open in new tab
+    window.open(url, '_blank');
+  });
+
+  // Form submit
+  el.form.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    el.btnSend.disabled = true;
+    el.btnSend.textContent = 'Envoi en cours...';
+
+    const text = el.message.value.trim();
+    if (!text) {
+      showToast('Écris un message avant d\'envoyer', 'error');
+      el.btnSend.disabled = false;
+      el.btnSend.textContent = 'Envoyer';
+      return;
+    }
+    if (text.length > MAX_CHARS) {
+      showToast('Ton message est trop long', 'error');
+      el.btnSend.disabled = false;
+      el.btnSend.textContent = 'Envoyer';
+      return;
+    }
+
+    // client-side spam guard
+    const localCount = localSendCount();
+    if (localCount >= LOCAL_LIMIT_COUNT) {
+      el.spamGuardInfo.style.display = 'inline-flex';
+      showToast('Tu envoies trop de messages. Réessaie dans une minute.', 'error', 4000);
+      el.btnSend.disabled = false;
+      el.btnSend.textContent = 'Envoyer';
+      return;
+    }
+
+    try {
+      // Optional: if you integrate reCAPTCHA v2/v3, call grecaptcha.execute and include token
+      let payload = {
+        message: text,
+        target: linkId
+      };
+
+      // If reCAPTCHA present on page, execute and attach token
+      if (typeof grecaptcha !== 'undefined' && RECAPTCHA_SITE_KEY) {
+        try {
+          const token = await grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: 'send' });
+          payload.recaptcha = token;
+        } catch (err) {
+          // ignore recaptcha errors, server may reject
+        }
+      }
+
+      const res = await fetch(SEND_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const body = await res.json().catch(() => ({}));
+      if (res.ok && body && (body.ok || body.success || res.status === 200)) {
+        // success
+        logLocalSend();
+        el.message.value = '';
+        updateCharCount();
+        showToast('Message envoyé 😎', 'success', 3500);
+        // update sent count UI (optimistic)
+        const prev = el.sentCount.textContent.match(/\d+/);
+        if (prev) {
+          const n = parseInt(prev[0],10) + 1;
+          el.sentCount.textContent = `Messages reçus : ${n}`;
+        }
+      } else {
+        // handle common server errors
+        if (res.status === 429) {
+          showToast(body.error || 'Trop de requêtes — réessaie plus tard', 'error', 5000);
+        } else if (res.status === 400) {
+          showToast(body.error || 'Contenu non autorisé ou invalide', 'error', 5000);
+        } else {
+          showToast(body.error || 'Erreur serveur — réessaie plus tard', 'error', 5000);
+        }
+        // if server provided retry-after, show note (not implemented)
+      }
+    } catch (err) {
+      showToast('Erreur réseau — vérifie ta connexion', 'error', 4000);
+    } finally {
+      el.btnSend.disabled = false;
+      el.btnSend.textContent = 'Envoyer';
+    }
+  });
+
+  // progressive enhancement: keyboard shortcut to submit (Ctrl/Cmd+Enter)
+  el.message.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      el.form.requestSubmit();
+    }
+  });
+
+  // initial spam indicator visibility
+  if (localSendCount() >= LOCAL_LIMIT_COUNT) {
+    el.spamGuardInfo.style.display = 'inline-flex';
+  } else {
+    el.spamGuardInfo.style.display = 'none';
+  }
+
+  // Accessibility: focus textarea on load
+  el.message.focus();
+
+  // Expose for debugging
+  window.__ngl_public = {
+    linkId, shareUrl, localSendCount
+  };
+})();
+</script>
+
+<!-- Placeholder for reCAPTCHA v3:
+<script src="https://www.google.com/recaptcha/api.js?render=YOUR_SITE_KEY"></script>
+and set window.__RECAPTCHA_SITE_KEY = 'YOUR_SITE_KEY' from server if used.
+-->
+
+</body>
+</html>
